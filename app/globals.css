@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(255, 122, 69, 0.06), transparent 40%),
+    radial-gradient(circle at 85% 100%, rgba(61, 220, 132, 0.05), transparent 40%);
+  background-attachment: fixed;
+}
