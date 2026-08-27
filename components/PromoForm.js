@@ -10,6 +10,7 @@ const emptyForm = {
   preco_anterior: "",
   preco_atual: "",
   link: "",
+  linkAfiliado: "",
 };
 
 export default function PromoForm({ onCreated, onClose }) {
@@ -58,6 +59,7 @@ export default function PromoForm({ onCreated, onClose }) {
     }
 
     const loja = detectarLoja(form.link);
+    const linkFinal = form.linkAfiliado.trim() || form.link || null;
 
     setSaving(true);
     const { error: insertError } = await supabase.from("promocoes").insert({
@@ -65,7 +67,7 @@ export default function PromoForm({ onCreated, onClose }) {
       loja,
       preco_anterior: form.preco_anterior ? Number(form.preco_anterior) : null,
       preco_atual: Number(form.preco_atual),
-      link: form.link || null,
+      link: linkFinal,
     });
     setSaving(false);
 
@@ -145,6 +147,31 @@ export default function PromoForm({ onCreated, onClose }) {
             onChange={(e) => update("preco_atual", e.target.value)}
             placeholder="89.00"
           />
+        </Field>
+
+        <Field label="Link de afiliado (opcional)" full>
+          <input
+            className="input"
+            value={form.linkAfiliado}
+            onChange={(e) => update("linkAfiliado", e.target.value)}
+            placeholder="Cole aqui o link já convertido, se tiver"
+          />
+          {form.link && detectarLoja(form.link) === "Mercado Livre" && !form.linkAfiliado && (
+            <p className="text-[11px] text-white/40 mt-1">
+              Mercado Livre não tem geração automática de link de afiliado.
+              Abra o{" "}
+              <a
+                href="https://www.mercadolivre.com.br/afiliados"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ember hover:underline"
+              >
+                gerador de links do ML
+              </a>
+              , cole o link do produto lá, copie o resultado e cole aqui.
+              Se deixar em branco, salva com o link original (sem comissão).
+            </p>
+          )}
         </Field>
       </div>
 
