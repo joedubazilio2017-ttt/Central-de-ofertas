@@ -1,6 +1,12 @@
+ARQUIVO: components/PromoCard.js
+AÇÃO: SUBSTITUIR o conteúdo do arquivo que já existe nesse caminho
+======================================================================
+
 "use client";
 
+import { useState } from "react";
 import { getScore } from "@/lib/score";
+import { gerarLegenda } from "@/lib/legenda";
 import { supabase } from "@/lib/supabaseClient";
 
 const statusLabel = {
@@ -17,6 +23,13 @@ const statusStyle = {
 
 export default function PromoCard({ promo, onChanged }) {
   const score = getScore(promo.desconto_percentual);
+  const [copiado, setCopiado] = useState(false);
+
+  async function copiarLegenda() {
+    await navigator.clipboard.writeText(gerarLegenda(promo));
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 1500);
+  }
 
   async function updateStatus(status) {
     await supabase.from("promocoes").update({ status }).eq("id", promo.id);
@@ -86,6 +99,13 @@ export default function PromoCard({ promo, onChanged }) {
           Rejeitar
         </button>
       </div>
+
+      <button
+        onClick={copiarLegenda}
+        className="text-xs py-1.5 rounded-md bg-ember/10 text-ember hover:bg-ember/20 transition"
+      >
+        {copiado ? "Copiado ✓" : "Copiar legenda"}
+      </button>
     </div>
   );
 }
