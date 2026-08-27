@@ -1,6 +1,7 @@
 import { buscarOfertasShopee } from "@/lib/affiliates/shopee";
 import { jaFoiEnviado } from "@/lib/affiliates/dedupe";
 import { filtrarOfertasValidas } from "@/lib/affiliates/filtros";
+import { gerarLinkAfiliadoShopee } from "@/lib/affiliates/afiliado-shopee";
 import { supabase } from "@/lib/supabaseClient";
 
 // Disparado manualmente pelo botão "Buscar novas ofertas" na home.
@@ -27,6 +28,8 @@ export async function POST() {
         continue;
       }
 
+      const linkAfiliado = await gerarLinkAfiliadoShopee(oferta.link);
+
       const { data, error } = await supabase
         .from("promocoes")
         .insert({
@@ -34,7 +37,7 @@ export async function POST() {
           loja: oferta.loja,
           preco_anterior: oferta.preco_anterior,
           preco_atual: oferta.preco_atual,
-          link: oferta.link,
+          link: linkAfiliado,
           origem: oferta.origem,
           produto_id_externo: oferta.produto_id_externo,
           status: "nova",
