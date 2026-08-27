@@ -10,6 +10,8 @@ export default function Home() {
   const [promocoes, setPromocoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [minerando, setMinerando] = useState(false);
+  const [resultadoMineracao, setResultadoMineracao] = useState(null);
   const [filters, setFilters] = useState({
     status: "todos",
     loja: "todas",
@@ -29,6 +31,27 @@ export default function Home() {
   useEffect(() => {
     loadPromocoes();
   }, []);
+
+  async function buscarNovasOfertas() {
+    setMinerando(true);
+    setResultadoMineracao(null);
+    try {
+      const res = await fetch("/api/mine-offers", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setResultadoMineracao({ erro: data.error || "Falha ao buscar ofertas." });
+        return;
+      }
+
+      setResultadoMineracao(data);
+      await loadPromocoes();
+    } catch (err) {
+      setResultadoMineracao({ erro: "Falha ao buscar ofertas." });
+    } finally {
+      setMinerando(false);
+    }
+  }
 
   const lojas = useMemo(
     () => [...new Set(promocoes.map((p) => p.loja))].sort(),
@@ -64,13 +87,36 @@ export default function Home() {
             {promocoes.length} promoção(ões) cadastrada(s)
           </p>
         </div>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="bg-ember hover:bg-ember/90 text-black text-sm font-medium px-4 py-2 rounded-md transition"
-        >
-          {showForm ? "Cancelar" : "+ Nova promoção"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={buscarNovasOfertas}
+            disabled={minerando}
+            className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md transition"
+          >
+            {minerando ? "Buscando..." : "🔍 Buscar novas ofertas"}
+          </button>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="bg-ember hover:bg-ember/90 text-black text-sm font-medium px-4 py-2 rounded-md transition"
+          >
+            {showForm ? "Cancelar" : "+ Nova promoção"}
+          </button>
+        </div>
       </header>
+
+      {resultadoMineracao && (
+        <div className="text-xs rounded-md px-3 py-2 bg-white/5 text-white/70">
+          {resultadoMineracao.erro ? (
+            <span className="text-weak">{resultadoMineracao.erro}</span>
+          ) : (
+            <span>
+              {resultadoMineracao.inseridas} nova(s) oferta(s) adicionada(s)
+              {resultadoMineracao.ignoradas_duplicadas > 0 &&
+                ` · ${resultadoMineracao.ignoradas_duplicadas} já existente(s), ignorada(s)`}
+            </span>
+          )}
+        </div>
+      )}
 
       {showForm && (
         <PromoForm
