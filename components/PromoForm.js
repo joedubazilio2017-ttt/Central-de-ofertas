@@ -1,3 +1,7 @@
+ARQUIVO: components/PromoForm.js
+AÇÃO: SUBSTITUIR o conteúdo do arquivo que já existe nesse caminho
+======================================================================
+
 "use client";
 
 import { useState } from "react";
@@ -14,10 +18,36 @@ const emptyForm = {
 export default function PromoForm({ onCreated, onClose }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [buscando, setBuscando] = useState(false);
   const [error, setError] = useState(null);
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function buscarDadosDoLink() {
+    if (!form.link) {
+      setError("Cole um link primeiro.");
+      return;
+    }
+    setError(null);
+    setBuscando(true);
+    try {
+      const res = await fetch("/api/fetch-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ link: form.link }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Não consegui buscar os dados desse link.");
+      } else {
+        update("nome", data.nome);
+      }
+    } catch {
+      setError("Não consegui buscar os dados desse link.");
+    }
+    setBuscando(false);
   }
 
   async function handleSubmit(e) {
@@ -67,6 +97,25 @@ export default function PromoForm({ onCreated, onClose }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field label="Link" full>
+          <div className="flex gap-2">
+            <input
+              className="input"
+              value={form.link}
+              onChange={(e) => update("link", e.target.value)}
+              placeholder="https://..."
+            />
+            <button
+              type="button"
+              onClick={buscarDadosDoLink}
+              disabled={buscando}
+              className="whitespace-nowrap text-xs px-3 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
+            >
+              {buscando ? "Buscando..." : "Buscar nome"}
+            </button>
+          </div>
+        </Field>
+
         <Field label="Nome do produto" required>
           <input
             className="input"
@@ -104,15 +153,6 @@ export default function PromoForm({ onCreated, onClose }) {
             value={form.preco_atual}
             onChange={(e) => update("preco_atual", e.target.value)}
             placeholder="89.00"
-          />
-        </Field>
-
-        <Field label="Link" full>
-          <input
-            className="input"
-            value={form.link}
-            onChange={(e) => update("link", e.target.value)}
-            placeholder="https://..."
           />
         </Field>
       </div>
