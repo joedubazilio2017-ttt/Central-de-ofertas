@@ -12,6 +12,7 @@ export async function POST() {
 
     const inseridas = [];
     const ignoradasDuplicadas = [];
+    const erros = [];
 
     for (const oferta of ofertas) {
       const duplicado = await jaFoiEnviado(
@@ -41,6 +42,7 @@ export async function POST() {
 
       if (error) {
         console.error("Erro ao inserir oferta:", error);
+        erros.push({ produto: oferta.produto_id_externo, mensagem: error.message });
         continue;
       }
 
@@ -51,6 +53,7 @@ export async function POST() {
       total_encontradas: ofertas.length,
       inseridas: inseridas.length,
       ignoradas_duplicadas: ignoradasDuplicadas.length,
+      erros,
     });
   } catch (err) {
     console.error("Erro no mine-offers:", err);
