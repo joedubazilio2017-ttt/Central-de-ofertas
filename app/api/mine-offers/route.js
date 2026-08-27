@@ -1,14 +1,16 @@
 import { buscarOfertasShopee } from "@/lib/affiliates/shopee";
 import { jaFoiEnviado } from "@/lib/affiliates/dedupe";
+import { filtrarOfertasValidas } from "@/lib/affiliates/filtros";
 import { supabase } from "@/lib/supabaseClient";
 
 // Disparado manualmente pelo botão "Buscar novas ofertas" na home.
 // Quando a Evolution API estiver pronta, dá pra reaproveitar essa mesma
 // rota (ou uma cópia dela) num cron/agendador externo — a lógica de
-// mineração + dedupe + inserção não muda.
+// mineração + filtro + dedupe + inserção não muda.
 export async function POST() {
   try {
-    const ofertas = await buscarOfertasShopee();
+    const ofertasBrutas = await buscarOfertasShopee();
+    const ofertas = filtrarOfertasValidas(ofertasBrutas);
 
     const inseridas = [];
     const ignoradasDuplicadas = [];
@@ -50,7 +52,8 @@ export async function POST() {
     }
 
     return Response.json({
-      total_encontradas: ofertas.length,
+      total_encontradas: ofertasBrutas.length,
+      descartadas_filtro: ofertasBrutas.length - ofertas.length,
       inseridas: inseridas.length,
       ignoradas_duplicadas: ignoradasDuplicadas.length,
       erros,
