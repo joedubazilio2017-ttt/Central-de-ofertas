@@ -20,6 +20,7 @@ const statusStyle = {
 export default function PromoCard({ promo, onChanged }) {
   const score = getScore(promo.desconto_percentual);
   const [copiado, setCopiado] = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
 
   async function copiarLegenda() {
     await navigator.clipboard.writeText(gerarLegenda(promo));
@@ -29,6 +30,11 @@ export default function PromoCard({ promo, onChanged }) {
 
   async function updateStatus(status) {
     await supabase.from("promocoes").update({ status }).eq("id", promo.id);
+    onChanged();
+  }
+
+  async function excluirPromocao() {
+    await supabase.from("promocoes").delete().eq("id", promo.id);
     onChanged();
   }
 
@@ -102,6 +108,30 @@ export default function PromoCard({ promo, onChanged }) {
       >
         {copiado ? "Copiado ✓" : "Copiar legenda"}
       </button>
+
+      {confirmandoExclusao ? (
+        <div className="flex gap-2">
+          <button
+            onClick={excluirPromocao}
+            className="flex-1 text-xs py-1.5 rounded-md bg-weak text-white hover:bg-weak/80 transition"
+          >
+            Confirmar exclusão
+          </button>
+          <button
+            onClick={() => setConfirmandoExclusao(false)}
+            className="flex-1 text-xs py-1.5 rounded-md bg-white/10 text-white/70 hover:bg-white/20 transition"
+          >
+            Cancelar
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setConfirmandoExclusao(true)}
+          className="text-xs py-1.5 rounded-md text-white/30 hover:text-weak hover:bg-weak/10 transition"
+        >
+          Excluir
+        </button>
+      )}
     </div>
   );
 }
