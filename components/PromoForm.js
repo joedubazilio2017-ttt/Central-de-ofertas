@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { detectarLoja } from "@/lib/loja";
 
 const emptyForm = {
   nome: "",
@@ -39,6 +40,7 @@ export default function PromoForm({ onCreated, onClose }) {
         setError(data.error || "Não consegui buscar os dados desse link.");
       } else {
         update("nome", data.nome);
+        if (data.preco_atual) update("preco_atual", String(data.preco_atual));
       }
     } catch {
       setError("Não consegui buscar os dados desse link.");
@@ -50,15 +52,17 @@ export default function PromoForm({ onCreated, onClose }) {
     e.preventDefault();
     setError(null);
 
-    if (!form.nome || !form.loja || !form.preco_atual) {
-      setError("Preencha nome, loja e preço atual.");
+    if (!form.nome || !form.link || !form.preco_atual) {
+      setError("Preencha o link, nome e preço atual.");
       return;
     }
+
+    const loja = detectarLoja(form.link);
 
     setSaving(true);
     const { error: insertError } = await supabase.from("promocoes").insert({
       nome: form.nome,
-      loja: form.loja,
+      loja,
       preco_anterior: form.preco_anterior ? Number(form.preco_anterior) : null,
       preco_atual: Number(form.preco_atual),
       link: form.link || null,
@@ -118,15 +122,6 @@ export default function PromoForm({ onCreated, onClose }) {
             value={form.nome}
             onChange={(e) => update("nome", e.target.value)}
             placeholder="Fone Bluetooth XYZ"
-          />
-        </Field>
-
-        <Field label="Loja" required>
-          <input
-            className="input"
-            value={form.loja}
-            onChange={(e) => update("loja", e.target.value)}
-            placeholder="Exemplo"
           />
         </Field>
 
