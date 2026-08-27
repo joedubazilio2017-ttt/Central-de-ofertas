@@ -59,6 +59,14 @@ export default function PromoForm({ onCreated, onClose }) {
     }
 
     const loja = detectarLoja(form.link);
+
+    if (loja === "Mercado Livre" && !form.linkAfiliado.trim()) {
+      setError(
+        "Para Mercado Livre, o link de afiliado é obrigatório (sem ele a promoção não gera comissão)."
+      );
+      return;
+    }
+
     const linkFinal = form.linkAfiliado.trim() || form.link || null;
 
     setSaving(true);
@@ -149,27 +157,28 @@ export default function PromoForm({ onCreated, onClose }) {
           />
         </Field>
 
-        <Field label="Link de afiliado (opcional)" full>
+        <Field
+          label={
+            detectarLoja(form.link) === "Mercado Livre"
+              ? "Link de afiliado"
+              : "Link de afiliado (opcional)"
+          }
+          required={detectarLoja(form.link) === "Mercado Livre"}
+          full
+        >
           <input
             className="input"
             value={form.linkAfiliado}
             onChange={(e) => update("linkAfiliado", e.target.value)}
-            placeholder="Cole aqui o link já convertido, se tiver"
+            placeholder="Cole aqui o link curto gerado pelo app (ex: meli.la/...)"
           />
-          {form.link && detectarLoja(form.link) === "Mercado Livre" && !form.linkAfiliado && (
+          {form.link && detectarLoja(form.link) === "Mercado Livre" && (
             <p className="text-[11px] text-white/40 mt-1">
-              Mercado Livre não tem geração automática de link de afiliado.
-              Abra o{" "}
-              <a
-                href="https://www.mercadolivre.com.br/afiliados"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-ember hover:underline"
-              >
-                gerador de links do ML
-              </a>
-              , cole o link do produto lá, copie o resultado e cole aqui.
-              Se deixar em branco, salva com o link original (sem comissão).
+              O Mercado Livre não tem uma página separada pra gerar link de afiliado.
+              Abra este mesmo produto no <strong>app do Mercado Livre</strong> (logado na
+              conta afiliada), toque em <strong>Compartilhar</strong> na página do produto,
+              e o app já gera o link curto de afiliado (formato meli.la/...). Copie esse
+              link e cole aqui — é obrigatório, sem ele a promoção não gera comissão.
             </p>
           )}
         </Field>
