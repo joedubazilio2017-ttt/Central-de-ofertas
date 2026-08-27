@@ -109,11 +109,18 @@ export default function Home() {
           {resultadoMineracao.erro ? (
             <span className="text-weak">{resultadoMineracao.erro}</span>
           ) : (
-            <span>
-              {resultadoMineracao.inseridas} nova(s) oferta(s) adicionada(s)
-              {resultadoMineracao.ignoradas_duplicadas > 0 &&
-                ` · ${resultadoMineracao.ignoradas_duplicadas} já existente(s), ignorada(s)`}
-            </span>
+            <div className="flex flex-col gap-1">
+              <span>
+                {resultadoMineracao.inseridas} nova(s) oferta(s) adicionada(s)
+                {resultadoMineracao.ignoradas_duplicadas > 0 &&
+                  ` · ${resultadoMineracao.ignoradas_duplicadas} já existente(s), ignorada(s)`}
+              </span>
+              {resultadoMineracao.erros?.length > 0 && (
+                <span className="text-weak">
+                  {resultadoMineracao.erros.length} erro(s) ao salvar: {resultadoMineracao.erros[0].mensagem}
+                </span>
+              )}
+            </div>
           )}
         </div>
       )}
