@@ -34,13 +34,38 @@ export async function POST(req) {
       );
     }
 
-    return Response.json({ nome: decodeEntities(nome) });
+    const preco = extractPreco(html);
+
+    return Response.json({
+      nome: decodeEntities(nome),
+      preco_atual: preco,
+    });
   } catch (err) {
     return Response.json(
       { error: "Não consegui acessar esse link." },
       { status: 502 }
     );
   }
+}
+
+function extractPreco(html) {
+  // Tenta meta tags de e-commerce (og:price:amount, product:price:amount)
+  const metaPreco =
+    extractMeta(html, "og:price:amount") ||
+    extractMeta(html, "product:price:amount");
+  if (metaPreco) {
+    const valor = parseFloat(metaPreco.replace(",", "."));
+    if (!isNaN(valor)) return valor;
+  }
+
+  // Fallback: procura padrão comum em dados estruturados (JSON-LD), tipo "price":"89.90"
+  const jsonMatch = html.match(/"price"\s*:\s*"?(\d+(\.\d{1,2})?)"?/i);
+  if (jsonMatch) {
+    const valor = parseFloat(jsonMatch[1]);
+    if (!isNaN(valor)) return valor;
+  }
+
+  return null;
 }
 
 function extractMeta(html, property) {
