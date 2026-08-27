@@ -114,6 +114,8 @@ export default function Home() {
                 {resultadoMineracao.inseridas} nova(s) oferta(s) adicionada(s)
                 {resultadoMineracao.ignoradas_duplicadas > 0 &&
                   ` · ${resultadoMineracao.ignoradas_duplicadas} já existente(s), ignorada(s)`}
+                {resultadoMineracao.descartadas_filtro > 0 &&
+                  ` · ${resultadoMineracao.descartadas_filtro} descartada(s) por desconto baixo`}
               </span>
               {resultadoMineracao.erros?.length > 0 && (
                 <span className="text-weak">
