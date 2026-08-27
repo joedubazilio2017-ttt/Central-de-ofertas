@@ -1,7 +1,3 @@
-ARQUIVO: app/api/fetch-link/route.js
-AÇÃO: Criar arquivo NOVO nesse caminho (crie também as pastas api/fetch-link dentro de app, se não existirem)
-======================================================================
-
 // Busca metadados públicos (og:title / title) de um link.
 // Roda no servidor porque o navegador bloqueia fetch cross-origin (CORS).
 // Não usa headless browser — só lê o HTML público da página, então
