@@ -1,7 +1,3 @@
-ARQUIVO: components/PromoForm.js
-AÇÃO: SUBSTITUIR o conteúdo do arquivo que já existe nesse caminho
-======================================================================
-
 "use client";
 
 import { useState } from "react";
